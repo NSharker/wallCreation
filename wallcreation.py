@@ -50,20 +50,66 @@ def wallCoordinates(robotXPos, robotYPos, maxDistOfLaser, startingAngle, angleIn
     """
     
     listOfCoordinates = []
-    currentAngleInRadian = startingAngle
+    currentAngleInRadian = float(startingAngle)
     for currentLaserReading in listOfLaserReading[::laserStride]:
         if(float(currentLaserReading) < float(maxDistOfLaser)):
-            wallX = (float (currentLaserReading) * math.cos(currentAngleInRadian)) + robotXPos
-            wallY = (float (currentLaserReading) * math.sin(currentAngleInRadian)) + robotYPos
+            wallX = (float(currentLaserReading) * math.cos(float(currentAngleInRadian))) + float(robotXPos)
+            wallY = (float(currentLaserReading) * math.sin(float(currentAngleInRadian))) + float(robotYPos)
             wallCoorTuple = (wallX, wallY)
             listOfCoordinates.append(wallCoorTuple)
-        currentAngleInRadian = currentAngleInRadian + (laserStride * angleIncrement)
+        currentAngleInRadian = currentAngleInRadian + (float(laserStride) * float(angleIncrement))
         
     return listOfCoordinates
 
+'''
+PARSER SECTION
+'''
 
-laserDataFile = open('firstDataLaser.txt','r')
+laserDataFile = open('data_laser.txt','r')
+robotPoseFile = open('data_pose.txt','r')
 
+#wallCoordinateFile = open('wallCoordinates.txt', 'w')
+timeStep = 0
+
+
+laserStrideNumber = 1
+
+#grabbing the header line for each file, these are not needed
+#laserDataFile.readline()
+#robotPoseFile.readline()
+testLaser = laserDataFile.readline().split(",")
+#print("startingAngle: " + str(testLaser[4]))
+#print("maxDistOfLaser: " + str(testLaser[10]))
+#print("angleIncrement: " + str(testLaser[6]))
+testPose = robotPoseFile.readline().split(",")
+#print("X coordinate: " + str(testPose[4]))
+#print("Y coordinate: " + str(testPose[5]))
+
+
+for laserDataLine in laserDataFile.readlines():
+    poseDataLineSplit = robotPoseFile.readline().split(",")
+    laserDataLineSplit = laserDataLine.split(",")
+    laserReaderList = []
+    for laser in laserDataLineSplit[11:]:
+        laserReaderList.append(laser)
+        
+    wallTupleList = wallCoordinates(poseDataLineSplit[4], poseDataLineSplit[5], laserDataLineSplit[10], laserDataLineSplit[4], laserDataLineSplit[6],laserStrideNumber, laserReaderList) 
+    writingCoordinateToFile = open ( str(timeStep) + '.txt', 'w')
+    
+    for tupleCoordinate in wallTupleList:
+        writingCoordinateToFile.write(str(tupleCoordinate))
+        writingCoordinateToFile.write("\n")
+    writingCoordinateToFile.close()
+    timeStep = timeStep + 1
+    
+
+
+
+    
+laserDataFile.close()
+robotPoseFile.close()
+#wallCoordinateFile.close()
+'''
 laserData = []
 
 for item in laserDataFile.readline().split("\t"):
@@ -74,3 +120,5 @@ listOfWallCoordinates = wallCoordinates(9.6347360611, 20.1799144745, 25, -1.9198
 print(listOfWallCoordinates[0])
 print (len(listOfWallCoordinates))
 laserDataFile.close()
+'''
+
